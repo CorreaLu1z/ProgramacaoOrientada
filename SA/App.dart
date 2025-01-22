@@ -1,38 +1,37 @@
 import 'dart:io';
 
-void main() {
-  // Lista para armazenar os dados dos alunos
-  List<Map<String, dynamic>> alunos = [];
+// Classe que representa uma Nota
+class Nota {
+  double valor;
 
-  while (true) {
-    // Coletando as informações do aluno
-    print('Informe o nome do aluno:');
-    String nome = stdin.readLineSync() ?? '';
+  Nota(this.valor);
 
-    List<double> notas = [];
-    for (int i = 1; i <= 3; i++) {
-      double nota;
-      while (true) {
-        print('Digite a nota $i de $nome:');
-        try {
-          nota = double.parse(stdin.readLineSync() ?? '');
-          if (nota >= 0 && nota <= 10) {
-            break;
-          } else {
-            print('Nota inválida. A nota deve estar entre 0 e 10.');
-          }
-        } catch (e) {
-          print('Entrada inválida. Por favor, insira um número válido.');
-        }
-      }
-      notas.add(nota);
+  // Valida se a nota está entre 0 e 10
+  bool isValida() {
+    return valor >= 0 && valor <= 10;
+  }
+}
+
+// Classe que representa um Aluno
+class Aluno {
+  String nome;
+  List<Nota> notas = [];
+  double media = 0.0;
+  String classificacao = '';
+
+  Aluno(this.nome);
+
+  // Calcula a média do aluno
+  void calcularMedia() {
+    double soma = 0.0;
+    for (var nota in notas) {
+      soma += nota.valor;
     }
+    media = soma / notas.length;
+  }
 
-    // Calculando a média do aluno
-    double media = (notas[0] + notas[1] + notas[2]) / 3;
-
-    // Classificando o aluno
-    String classificacao;
+  // Classifica o aluno com base na média
+  void classificarAluno() {
     if (media >= 7.0) {
       classificacao = 'Aprovado';
     } else if (media >= 5.0) {
@@ -40,14 +39,54 @@ void main() {
     } else {
       classificacao = 'Reprovado';
     }
+  }
 
-    // Armazenando os dados do aluno
-    alunos.add({
-      'nome': nome,
-      'notas': notas,
-      'media': media,
-      'classificacao': classificacao,
-    });
+  // Exibe os dados do aluno
+  void exibirDados() {
+    print('Nome: $nome');
+    print('Notas: ${notas.map((n) => n.valor.toStringAsFixed(2)).join(', ')}');
+    print('Média: ${media.toStringAsFixed(2)}');
+    print('Classificação: $classificacao\n');
+  }
+}
+
+void main() {
+  List<Aluno> alunos = [];
+
+  while (true) {
+    // Coletando as informações do aluno
+    print('Informe o nome do aluno:');
+    String nome = stdin.readLineSync() ?? '';
+
+    Aluno aluno = Aluno(nome);
+
+    // Coletando as 3 notas do aluno
+    for (int i = 1; i <= 3; i++) {
+      double notaValor;
+      while (true) {
+        print('Digite a nota $i de $nome:');
+        try {
+          notaValor = double.parse(stdin.readLineSync() ?? '');
+          Nota nota = Nota(notaValor);
+          // Verificando se a nota é válida
+          if (nota.isValida()) {
+            aluno.notas.add(nota);
+            break; // Sai do loop quando a nota é válida
+          } else {
+            print('Nota inválida. A nota deve estar entre 0 e 10.');
+          }
+        } catch (e) {
+          print('Entrada inválida. Por favor, insira um número válido.');
+        }
+      }
+    }
+
+    // Calculando a média e classificando o aluno
+    aluno.calcularMedia();
+    aluno.classificarAluno();
+
+    // Adicionando o aluno à lista
+    alunos.add(aluno);
 
     // Perguntando se o usuário quer adicionar mais alunos
     print('Adicionar mais alunos? (s/n):');
@@ -60,9 +99,6 @@ void main() {
   // Exibindo o relatório final
   print('\nRelatório Final:\n');
   for (var aluno in alunos) {
-    print('Nome: ${aluno['nome']}');
-    print('Notas: ${aluno['notas'][0]}, ${aluno['notas'][1]}, ${aluno['notas'][2]}');
-    print('Média: ${aluno['media'].toStringAsFixed(2)}');
-    print('Classificação: ${aluno['classificacao']}\n');
+    aluno.exibirDados();
   }
 }
